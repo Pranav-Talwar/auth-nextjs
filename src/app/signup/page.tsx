@@ -1,23 +1,45 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import toast from "react-hot-toast";
+// import { set } from "mongoose";
 
 export default function SignupPage() {
   const router = useRouter();
-
+  const [Loading, setLoading] = React.useState(false)
   const [user, setUser] = React.useState({
     email: "",
     password: "",
     username: "",
   });
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
-  const onSignup = async () => {}
+  const onSignup = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/users/signup", user);
+      console.log("signup success", response.data);
+      router.push("/login");
+    } catch (error:any) {
+      console.log("Error in signup", error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (user.email.length > 0 && user.password.length > 0 && user.username.length > 0) {
+      setButtonDisabled(false); }
+    else{
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   return (
     <div className="flex flex-col items-center p-6 justify-center h-screen ">
-      <h1 className="text-4xl font-bold">Signup</h1>
+      <h1 className="text-4xl font-bold">{Loading ? "Processing" : "Signup"} </h1>
       <br />
       <hr />
       <div className="flex flex-col gap-4 justify-left border-2 border-gray-300 rounded-lg p-2">
@@ -61,9 +83,9 @@ export default function SignupPage() {
       </div>
       <div className="flex flex-row gap-4">
      <button className="p-1 border border-gray-300 rounded-lg " 
-     onClick={onSignup}>Signup here</button>
+     onClick={onSignup}>{buttonDisabled ? "❌ Signup" : "Signup"}</button>
      <Link href="/login">
-  <button className="p-1 border border-gray-300 rounded-lg">Visit login</button>
+  <button className="p-1 border border-gray-300 rounded-lg">Visit Login</button>
 </Link> 
 
       </div>
